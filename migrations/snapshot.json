@@ -1,21 +1,60 @@
 {
   "version": 1,
   "tables": {
-    "notes": {
+    "accounts": {
       "columns": {
         "id": {
           "type": "id",
           "primaryKey": true,
           "notNull": true
         },
-        "userId": {
+        "createdBy": {
           "type": "refUser",
           "length": 255,
           "notNull": true
         },
-        "text": {
+        "provider": {
+          "type": "varchar",
+          "length": 16,
+          "notNull": true
+        },
+        "name": {
+          "type": "varchar",
+          "length": 100,
+          "notNull": true
+        },
+        "endpoint": {
+          "type": "varchar",
+          "length": 255,
+          "notNull": true
+        },
+        "region": {
+          "type": "varchar",
+          "length": 64,
+          "notNull": true
+        },
+        "pathStyle": {
+          "type": "boolean",
+          "notNull": true,
+          "defaultValue": true
+        },
+        "credentials": {
           "type": "text",
           "notNull": true
+        },
+        "ca": {
+          "type": "text"
+        },
+        "status": {
+          "type": "varchar",
+          "length": 8,
+          "notNull": true
+        },
+        "lastError": {
+          "type": "text"
+        },
+        "lastCheckAt": {
+          "type": "timestamp"
         },
         "createdAt": {
           "type": "timestamp",
@@ -25,8 +64,97 @@
       },
       "indexes": [
         {
-          "name": "idx_p_hello_world_notes_user_id",
-          "columns": ["userId"]
+          "name": "uq_p_object_storage_accounts_name",
+          "columns": [
+            "name"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    "usage": {
+      "columns": {
+        "id": {
+          "type": "id",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "accountId": {
+          "type": "integer",
+          "notNull": true
+        },
+        "bucket": {
+          "type": "varchar",
+          "length": 255,
+          "notNull": true
+        },
+        "day": {
+          "type": "varchar",
+          "length": 10,
+          "notNull": true
+        },
+        "bytes": {
+          "type": "bigint",
+          "notNull": true
+        },
+        "objects": {
+          "type": "bigint",
+          "notNull": true
+        },
+        "partial": {
+          "type": "boolean",
+          "notNull": true,
+          "defaultValue": false
+        },
+        "scannedAt": {
+          "type": "timestamp",
+          "notNull": true,
+          "defaultNow": true
+        }
+      },
+      "indexes": [
+        {
+          "name": "uq_p_object_storage_usage_day",
+          "columns": [
+            "accountId",
+            "bucket",
+            "day"
+          ],
+          "unique": true
+        }
+      ]
+    },
+    "limits": {
+      "columns": {
+        "id": {
+          "type": "id",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "accountId": {
+          "type": "integer",
+          "notNull": true
+        },
+        "bucket": {
+          "type": "varchar",
+          "length": 255,
+          "notNull": true
+        },
+        "maxBytes": {
+          "type": "bigint"
+        },
+        "maxObjects": {
+          "type": "bigint"
+        }
+      },
+      "indexes": [
+        {
+          "name": "uq_p_object_storage_limits_bucket",
+          "columns": [
+            "accountId",
+            "bucket"
+          ],
+          "unique": true
         }
       ]
     }

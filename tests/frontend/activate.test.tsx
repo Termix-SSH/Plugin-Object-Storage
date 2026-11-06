@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import {
   renderWithApp,
   type RenderedPluginApp,
@@ -8,6 +8,13 @@ import type { PluginManifest } from "@termix-ssh/plugin-sdk/manifest";
 import * as plugin from "../../src/frontend/index";
 import manifestJson from "../../manifest.json";
 import locales from "../../locales/en.json";
+import {
+  baseName,
+  crumbs,
+  formatBytes,
+  isPreviewImage,
+  limitTone,
+} from "../../src/frontend/format";
 
 const manifest = manifestJson as unknown as PluginManifest;
 
@@ -18,53 +25,94 @@ afterEach(async () => {
   rendered = null;
 });
 
+const answers: Record<string, unknown> = {
+  "/providers": { providers: [] },
+  "/accounts": {
+    accounts: [
+      {
+        id: 1,
+        provider: "minio",
+        name: "Main",
+        endpoint: "http://minio.local:9000",
+        region: "us-east-1",
+        pathStyle: true,
+        hasCa: false,
+        status: "ok",
+        lastError: null,
+        lastCheckAt: null,
+      },
+    ],
+  },
+  "/accounts/1/buckets": {
+    buckets: [
+      {
+        name: "docs",
+        createdAt: null,
+        bytes: 2048,
+        objects: 3,
+        partial: false,
+        scannedAt: null,
+        maxBytes: null,
+        maxObjects: null,
+      },
+    ],
+  },
+};
+
+const api = (overrides: Record<string, unknown> = {}) =>
+  ({
+    get: vi.fn(async (path: string) => ({
+      data: { ...answers, ...overrides }[path],
+    })),
+  }) as never;
+
 describe(`${manifest.id} activate`, () => {
-  it("registers the rail item and tab", async () => {
+  it("registers the rail item, tab and dashboard card", async () => {
     rendered = await renderWithApp(plugin, { manifest, locales });
-    expect(rendered.registered.tabs()).toEqual(["hello-world"]);
+    expect(rendered.registered.tabs()).toEqual(["object-storage"]);
     expect(rendered.registered.railItems()).toEqual([
       expect.objectContaining({
-        id: "hello-world",
-        permission: "hello-world.use",
+        id: "object-storage",
+        permission: "object-storage.view",
       }),
     ]);
   });
 
-  it("shows the greeting and notes", async () => {
-    rendered = await renderWithApp(plugin, {
-      manifest,
-      locales,
-      api: {
-        get: vi.fn(async () => ({
-          data: {
-            greeting: "Hi there",
-            notes: [{ id: 1, text: "first", createdAt: "" }],
-          },
-        })),
-      } as never,
-    });
-    rendered.renderTab("hello-world", { isVisible: true });
-    expect(await screen.findByText("Hi there")).toBeTruthy();
-    expect(screen.getByText("first")).toBeTruthy();
+  it("lists buckets with their size", async () => {
+    rendered = await renderWithApp(plugin, { manifest, locales, api: api() });
+    rendered.renderTab("object-storage", { isVisible: true });
+    expect(await screen.findByText("docs")).toBeTruthy();
+    expect(screen.getByText(/2\.0 KB/)).toBeTruthy();
   });
 
-  it("shows an error when a note cannot be saved", async () => {
+  it("shows the empty state with no logins", async () => {
     rendered = await renderWithApp(plugin, {
       manifest,
       locales,
-      api: {
-        get: vi.fn(async () => ({ data: { greeting: "Hello", notes: [] } })),
-        post: vi.fn(async () => {
-          throw new Error("offline");
-        }),
-      } as never,
+      api: api({ "/accounts": { accounts: [] } }),
     });
-    rendered.renderTab("hello-world", { isVisible: true });
-    await screen.findByText(locales.tab.empty);
-    fireEvent.change(screen.getByPlaceholderText(locales.tab.placeholder), {
-      target: { value: "note" },
-    });
-    fireEvent.click(screen.getByText(locales.tab.add));
-    expect(await screen.findByText(locales.tab.error)).toBeTruthy();
+    rendered.renderTab("object-storage", { isVisible: true });
+    expect(await screen.findByText(locales.accounts.empty)).toBeTruthy();
+  });
+});
+
+describe("format", () => {
+  it("shortens sizes", () => {
+    expect(formatBytes(0)).toBe("0 B");
+    expect(formatBytes(1536)).toBe("1.5 KB");
+    expect(formatBytes(5 * 1024 ** 3)).toBe("5.0 GB");
+    expect(formatBytes(null)).toBe("");
+  });
+
+  it("splits paths", () => {
+    expect(baseName("a/b/c.txt")).toBe("c.txt");
+    expect(baseName("a/b/")).toBe("b");
+    expect(crumbs("a/b/")).toEqual([
+      { name: "a", prefix: "a/" },
+      { name: "b", prefix: "a/b/" },
+    ]);
+    expect(isPreviewImage("x.PNG")).toBe(true);
+    expect(limitTone(85)).toBe("warn");
+    expect(limitTone(100)).toBe("bad");
   });
 });
