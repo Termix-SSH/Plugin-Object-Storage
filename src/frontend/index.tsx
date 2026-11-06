@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { storageWidget } from "./HomepageWidget";
 import { KeyRound, Package, Pencil, Plug, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -529,6 +530,8 @@ export function activate(app: TermixApp): void {
     singleton: true,
     hostless: true,
   });
+  app.registerExtension("homepage.widgets", storageWidget(app.t));
+
   app.registerDashboardCard({
     id: "object-storage-usage",
     titleKey: "card.title",

@@ -216,5 +216,13 @@
     "ignorePublicAcls": "Ignore public ACLs",
     "blockPublicPolicy": "Block public bucket policies",
     "restrictPublicBuckets": "Restrict access to public buckets"
+  },
+  "widget": {
+    "name": "Object storage",
+    "description": "Buckets, stored size and logins that fail.",
+    "buckets": "Buckets",
+    "size": "Stored",
+    "overQuota": "Near limit",
+    "failing": "Failing logins"
   }
 }
