@@ -137,29 +137,31 @@ export function SettingsPanel({
   return (
     <div className="space-y-px overflow-auto">
       <SectionCard title={t("settings.limits")} icon={<Settings2 />}>
-        <FieldPair>
-          <NumberField
-            label={t("settings.limitGb")}
-            value={limitGb}
-            min={0}
-            onChange={setLimitGb}
-            hint={t("settings.limitHint")}
-          />
-          <NumberField
-            label={t("settings.limitObjects")}
-            value={limitObjects}
-            min={0}
-            onChange={setLimitObjects}
-          />
-        </FieldPair>
-        <div>
-          <Button
-            size="sm"
-            disabled={saving === "limit"}
-            onClick={() => void saveLimit()}
-          >
-            {t("settings.save")}
-          </Button>
+        <div className="flex flex-col gap-3 py-2">
+          <FieldPair>
+            <NumberField
+              label={t("settings.limitGb")}
+              value={limitGb}
+              min={0}
+              onChange={setLimitGb}
+              hint={t("settings.limitHint")}
+            />
+            <NumberField
+              label={t("settings.limitObjects")}
+              value={limitObjects}
+              min={0}
+              onChange={setLimitObjects}
+            />
+          </FieldPair>
+          <div>
+            <Button
+              size="sm"
+              disabled={saving === "limit"}
+              onClick={() => void saveLimit()}
+            >
+              {t("settings.save")}
+            </Button>
+          </div>
         </div>
       </SectionCard>
 
