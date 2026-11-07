@@ -26,6 +26,7 @@ Read the [docs](https://docs.termix.site/plugins/object-storage) to set it up an
 - Share an object with a temporary link
 - Create and delete buckets, and set versioning, lifecycle rules, CORS, policy, tags, encryption and public access
 - Daily size history for every bucket, with alerts when a bucket passes its limit or a login stops working
+- A dashboard card and Termix actions for the assistant, rules and the CLI
 
 <br />
 
