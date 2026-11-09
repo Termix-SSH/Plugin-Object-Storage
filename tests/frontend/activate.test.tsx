@@ -116,3 +116,10 @@ describe("format", () => {
     expect(limitTone(100)).toBe("bad");
   });
 });
+
+describe("homepage widget", () => {
+  it("is offered to the homepage", async () => {
+    rendered = await renderWithApp(plugin, { manifest, locales });
+    expect(rendered.registered.extensions("homepage.widgets")).toHaveLength(1);
+  });
+});

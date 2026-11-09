@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { storageWidget } from "./HomepageWidget";
 import { KeyRound, Package, Pencil, Plug, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -13,16 +14,19 @@ import {
   BackButton,
   Button,
   EmptyState,
-  Input,
+  FormFooter,
+  InlineView,
   ListBadge,
   ListRow,
   ListRowAction,
   LoadingState,
-  PanePrompt,
   PanelList,
   PanelShell,
   RefreshButton,
+  SectionCard,
+  SelectField,
   TabStrip,
+  TextField,
   useConfirm,
 } from "@termix-ssh/plugin-sdk/ui";
 import type {
@@ -72,6 +76,7 @@ function StorageTab({ isVisible }: TabProps) {
   >([]);
   const [loaded, setLoaded] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [savingBucket, setSavingBucket] = useState(false);
   const [creating, setCreating] = useState<{
     accountId: number;
     name: string;
@@ -167,12 +172,15 @@ function StorageTab({ isVisible }: TabProps) {
 
   async function createBucket() {
     if (!creating?.name.trim()) return;
+    setSavingBucket(true);
     try {
       await api.createBucket(creating.accountId, creating.name.trim());
       setCreating(null);
       await reload();
     } catch (error) {
       toast.error(errorMessage(error));
+    } finally {
+      setSavingBucket(false);
     }
   }
 
@@ -190,6 +198,52 @@ function StorageTab({ isVisible }: TabProps) {
     } catch (error) {
       toast.error(errorMessage(error));
     }
+  }
+
+  if (creating) {
+    return (
+      <InlineView
+        stacked
+        open
+        onOpenChange={(open) => !open && setCreating(null)}
+        icon={<Package className="size-4" />}
+        title={t("buckets.add")}
+        footer={
+          <FormFooter
+            saving={savingBucket}
+            disabled={!creating.name.trim()}
+            onCancel={() => setCreating(null)}
+            onSave={() => void createBucket()}
+            saveLabel={t("buckets.create")}
+          />
+        }
+      >
+        <SectionCard title={t("buckets.add")} icon={<Package />}>
+          <div className="flex flex-col gap-3 py-2">
+            {accounts.length > 1 && (
+              <SelectField
+                label={t("operations.account")}
+                value={String(creating.accountId)}
+                onChange={(next) =>
+                  setCreating({ ...creating, accountId: Number(next) })
+                }
+                options={accounts.map((account) => ({
+                  value: String(account.id),
+                  label: account.name,
+                }))}
+              />
+            )}
+            <TextField
+              label={t("buckets.name")}
+              hint={t("buckets.nameHint")}
+              value={creating.name}
+              onChange={(name) => setCreating({ ...creating, name })}
+              placeholder={t("buckets.namePlaceholder")}
+            />
+          </div>
+        </SectionCard>
+      </InlineView>
+    );
   }
 
   if (overlay?.kind === "account") {
@@ -460,57 +514,6 @@ function StorageTab({ isVisible }: TabProps) {
           ))}
         </PanelList>
       )}
-
-      <PanePrompt
-        open={!!creating}
-        title={t("buckets.add")}
-        description={t("buckets.nameHint")}
-        onCancel={() => setCreating(null)}
-        actions={
-          <>
-            <Button variant="outline" onClick={() => setCreating(null)}>
-              {t("cancel")}
-            </Button>
-            <Button onClick={() => void createBucket()}>
-              {t("buckets.create")}
-            </Button>
-          </>
-        }
-      >
-        {creating && (
-          <div className="space-y-2">
-            {accounts.length > 1 && (
-              <select
-                className="h-9 w-full border border-border bg-background px-2 text-sm"
-                value={creating.accountId}
-                onChange={(event) =>
-                  setCreating({
-                    ...creating,
-                    accountId: Number(event.target.value),
-                  })
-                }
-              >
-                {accounts.map((account) => (
-                  <option key={account.id} value={account.id}>
-                    {account.name}
-                  </option>
-                ))}
-              </select>
-            )}
-            <Input
-              autoFocus
-              value={creating.name}
-              onChange={(event) =>
-                setCreating({ ...creating, name: event.target.value })
-              }
-              onKeyDown={(event) =>
-                event.key === "Enter" && void createBucket()
-              }
-              placeholder={t("buckets.namePlaceholder")}
-            />
-          </div>
-        )}
-      </PanePrompt>
     </PanelShell>
   );
 }
@@ -529,6 +532,8 @@ export function activate(app: TermixApp): void {
     singleton: true,
     hostless: true,
   });
+  app.registerExtension("homepage.widgets", storageWidget(app.t));
+
   app.registerDashboardCard({
     id: "object-storage-usage",
     titleKey: "card.title",
