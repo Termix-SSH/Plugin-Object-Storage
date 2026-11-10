@@ -6,6 +6,12 @@
 
 <p>Browse and manage S3-compatible object storage buckets and files</p>
 
+<!-- VIDEO:START -->
+
+<a href="https://www.youtube.com/watch?v=nS3ZS6s0vK4"><img src="https://img.shields.io/badge/Watch_the_demo-f59145?style=for-the-badge&logo=youtube&logoColor=white" alt="Watch the demo on YouTube" /></a>
+
+<!-- VIDEO:END -->
+
 </div>
 
 <br />
