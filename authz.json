@@ -1,0 +1,237 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Termix-SSH/Termix/main/scripts/authz/authz.schema.json",
+  "seed": [
+    {
+      "as": "admin",
+      "method": "POST",
+      "path": "/plugin-api/object-storage/accounts",
+      "body": {
+        "provider": "minio",
+        "name": "authz-own-s3",
+        "endpoint": "http://127.0.0.1:9",
+        "region": "us-east-1",
+        "pathStyle": true,
+        "accessKeyId": "authz",
+        "secretAccessKey": "authz-secret"
+      },
+      "capture": {
+        "object-storage.accounts": "id"
+      }
+    }
+  ],
+  "routes": {
+    "GET /plugin-api/object-storage/accounts": {
+      "access": "user",
+      "permission": "object-storage.view"
+    },
+    "POST /plugin-api/object-storage/accounts": {
+      "access": "user"
+    },
+    "DELETE /plugin-api/object-storage/accounts/:accountId": {
+      "access": "user",
+      "destructive": true,
+      "note": "Accounts are shared with everyone who may view them (see docs)",
+      "params": {
+        "accountId": "object-storage.accounts"
+      },
+      "permission": "object-storage.view"
+    },
+    "PUT /plugin-api/object-storage/accounts/:accountId": {
+      "access": "user",
+      "note": "Accounts are shared with everyone who may view them (see docs)",
+      "params": {
+        "accountId": "object-storage.accounts"
+      },
+      "permission": "object-storage.view"
+    },
+    "GET /plugin-api/object-storage/accounts/:accountId/buckets": {
+      "access": "user",
+      "permission": "object-storage.view",
+      "note": "Accounts are shared with everyone who may view them (see docs)",
+      "params": {
+        "accountId": "object-storage.accounts"
+      },
+      "allowed": "any"
+    },
+    "POST /plugin-api/object-storage/accounts/:accountId/buckets": {
+      "access": "user",
+      "note": "Accounts are shared with everyone who may view them (see docs)",
+      "params": {
+        "accountId": "object-storage.accounts"
+      },
+      "permission": "object-storage.view",
+      "allowed": "any"
+    },
+    "DELETE /plugin-api/object-storage/accounts/:accountId/buckets/:bucket": {
+      "access": "user",
+      "params": {
+        "accountId": "object-storage.accounts",
+        "bucket": "=authz-bucket"
+      },
+      "destructive": true,
+      "note": "Accounts are shared with everyone who may view them (see docs)",
+      "permission": "object-storage.view",
+      "allowed": "any"
+    },
+    "POST /plugin-api/object-storage/accounts/:accountId/buckets/:bucket/copy": {
+      "access": "user",
+      "params": {
+        "accountId": "object-storage.accounts",
+        "bucket": "=authz-bucket"
+      },
+      "note": "Accounts are shared with everyone who may view them (see docs)",
+      "permission": "object-storage.view",
+      "allowed": "any"
+    },
+    "POST /plugin-api/object-storage/accounts/:accountId/buckets/:bucket/delete": {
+      "access": "user",
+      "params": {
+        "accountId": "object-storage.accounts",
+        "bucket": "=authz-bucket"
+      },
+      "destructive": true,
+      "note": "Accounts are shared with everyone who may view them (see docs)",
+      "permission": "object-storage.view",
+      "allowed": "any"
+    },
+    "GET /plugin-api/object-storage/accounts/:accountId/buckets/:bucket/download": {
+      "access": "user",
+      "permission": "object-storage.view",
+      "note": "Accounts are shared with everyone who may view them (see docs)",
+      "params": {
+        "accountId": "object-storage.accounts",
+        "bucket": "=authz-bucket"
+      },
+      "allowed": "any"
+    },
+    "POST /plugin-api/object-storage/accounts/:accountId/buckets/:bucket/folder": {
+      "access": "user",
+      "params": {
+        "accountId": "object-storage.accounts",
+        "bucket": "=authz-bucket"
+      },
+      "note": "Accounts are shared with everyone who may view them (see docs)",
+      "permission": "object-storage.view",
+      "allowed": "any"
+    },
+    "GET /plugin-api/object-storage/accounts/:accountId/buckets/:bucket/head": {
+      "access": "user",
+      "params": {
+        "accountId": "object-storage.accounts",
+        "bucket": "=authz-bucket"
+      },
+      "note": "Accounts are shared with everyone who may view them (see docs)",
+      "permission": "object-storage.view",
+      "query": {
+        "key": "authz.txt"
+      },
+      "allowed": "any"
+    },
+    "PUT /plugin-api/object-storage/accounts/:accountId/buckets/:bucket/limit": {
+      "access": "user",
+      "params": {
+        "accountId": "object-storage.accounts",
+        "bucket": "=authz-bucket"
+      },
+      "note": "Accounts are shared with everyone who may view them (see docs)",
+      "permission": "object-storage.view",
+      "allowed": "any"
+    },
+    "POST /plugin-api/object-storage/accounts/:accountId/buckets/:bucket/move": {
+      "access": "user",
+      "params": {
+        "accountId": "object-storage.accounts",
+        "bucket": "=authz-bucket"
+      },
+      "note": "Accounts are shared with everyone who may view them (see docs)",
+      "permission": "object-storage.view",
+      "allowed": "any"
+    },
+    "GET /plugin-api/object-storage/accounts/:accountId/buckets/:bucket/objects": {
+      "access": "user",
+      "params": {
+        "accountId": "object-storage.accounts",
+        "bucket": "=authz-bucket"
+      },
+      "note": "Accounts are shared with everyone who may view them (see docs)",
+      "permission": "object-storage.view",
+      "allowed": "any"
+    },
+    "POST /plugin-api/object-storage/accounts/:accountId/buckets/:bucket/scan": {
+      "access": "user",
+      "params": {
+        "accountId": "object-storage.accounts",
+        "bucket": "=authz-bucket"
+      },
+      "note": "Accounts are shared with everyone who may view them (see docs)",
+      "permission": "object-storage.view",
+      "allowed": "any"
+    },
+    "GET /plugin-api/object-storage/accounts/:accountId/buckets/:bucket/settings": {
+      "access": "user",
+      "params": {
+        "accountId": "object-storage.accounts",
+        "bucket": "=authz-bucket"
+      },
+      "note": "Accounts are shared with everyone who may view them (see docs)",
+      "permission": "object-storage.manage",
+      "allowed": "any"
+    },
+    "PUT /plugin-api/object-storage/accounts/:accountId/buckets/:bucket/settings/:kind": {
+      "access": "user",
+      "params": {
+        "accountId": "object-storage.accounts",
+        "bucket": "=authz-bucket"
+      },
+      "note": "Accounts are shared with everyone who may view them (see docs)",
+      "permission": "object-storage.view",
+      "allowed": "any"
+    },
+    "POST /plugin-api/object-storage/accounts/:accountId/buckets/:bucket/share": {
+      "access": "user",
+      "params": {
+        "accountId": "object-storage.accounts",
+        "bucket": "=authz-bucket"
+      },
+      "note": "Accounts are shared with everyone who may view them (see docs)",
+      "permission": "object-storage.view",
+      "allowed": "any"
+    },
+    "POST /plugin-api/object-storage/accounts/:accountId/buckets/:bucket/upload": {
+      "access": "user",
+      "params": {
+        "accountId": "object-storage.accounts",
+        "bucket": "=authz-bucket"
+      },
+      "note": "Accounts are shared with everyone who may view them (see docs)",
+      "permission": "object-storage.view",
+      "allowed": "any"
+    },
+    "GET /plugin-api/object-storage/accounts/:accountId/buckets/:bucket/usage": {
+      "access": "user",
+      "params": {
+        "accountId": "object-storage.accounts",
+        "bucket": "=authz-bucket"
+      },
+      "note": "Accounts are shared with everyone who may view them (see docs)",
+      "permission": "object-storage.view",
+      "allowed": "any"
+    },
+    "POST /plugin-api/object-storage/accounts/:accountId/test": {
+      "access": "user",
+      "note": "Accounts are shared with everyone who may view them (see docs)",
+      "params": {
+        "accountId": "object-storage.accounts"
+      },
+      "permission": "object-storage.view"
+    },
+    "GET /plugin-api/object-storage/providers": {
+      "access": "user",
+      "permission": "object-storage.view"
+    },
+    "GET /plugin-api/object-storage/summary": {
+      "access": "user",
+      "permission": "object-storage.view"
+    }
+  }
+}
