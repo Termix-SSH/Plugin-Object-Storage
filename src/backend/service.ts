@@ -15,6 +15,7 @@ import type {
 import { providerIds } from "./presets.js";
 import { PART_SIZE, S3Client, S3Error } from "./s3/client.js";
 import { readSettings, writeSetting } from "./s3/settings.js";
+import { chunkedGet } from "./s3/chunked.js";
 
 export class StorageError extends Error {
   constructor(
@@ -481,7 +482,10 @@ export function createService(ctx: PluginContext, stores: Stores) {
   ): Promise<Response> {
     const client = await clientFor(accountId);
     try {
-      return await client.get(bucket, cleanKey(key), range, signal);
+      return await chunkedGet(
+        (part) => client.get(bucket, cleanKey(key), part, signal),
+        range,
+      );
     } catch (error) {
       return wrap(error);
     }

@@ -30,6 +30,7 @@ async function setup(permissions: string[]) {
     .run("user-1", "user-1");
   let routes: Router | null = null;
   mock = createMockCtx({
+    sandbox: true,
     pluginId: manifest.id,
     manifest,
     capabilities: manifest.capabilities,
