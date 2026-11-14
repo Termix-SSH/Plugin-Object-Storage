@@ -13,6 +13,7 @@ import type {
   UsagePoint,
 } from "../shared/types.js";
 import { providerIds } from "./presets.js";
+import { keepAwake } from "./keep-awake.js";
 import { PART_SIZE, S3Client, S3Error } from "./s3/client.js";
 import { readSettings, writeSetting } from "./s3/settings.js";
 import { chunkedGet } from "./s3/chunked.js";
@@ -890,6 +891,8 @@ export function createService(ctx: PluginContext, stores: Stores) {
 
   /** Called every minute. Does the slow work only when it is due. */
   async function runDue() {
+    // No accounts: nothing keeps the process running.
+    keepAwake(ctx, "tick", (await rows()).length > 0);
     const now = Date.now();
     if (now - lastCheck >= CHECK_EVERY_MS) {
       lastCheck = now;
