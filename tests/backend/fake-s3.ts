@@ -95,14 +95,7 @@ export function fakeS3(
           subs.set(`${bucketName}:versioning`, String(init.body));
           return new Response("", { status: 200 });
         }
-        return xml(
-          stored
-            ? stored.replace(
-                "VersioningConfiguration",
-                "VersioningConfiguration",
-              )
-            : "<VersioningConfiguration/>",
-        );
+        return xml(stored ?? "<VersioningConfiguration/>");
       }
       if (q.has("tagging")) {
         const stored = subs.get(`${bucketName}:tagging`);
