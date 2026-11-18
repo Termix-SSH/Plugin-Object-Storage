@@ -30,6 +30,7 @@ async function setup(permissions: string[]) {
     .run("user-1", "user-1");
   let routes: Router | null = null;
   mock = createMockCtx({
+    sandbox: true,
     pluginId: manifest.id,
     manifest,
     capabilities: manifest.capabilities,
@@ -462,3 +463,33 @@ async function afterEachReset() {
   db.close();
   await setup(ALL);
 }
+
+describe("buckets added by hand", () => {
+  it("lists buckets the login can't list, once each", async () => {
+    const id = await addAccount();
+    await request("POST", `/accounts/${id}/buckets`, { name: "docs" });
+    const saved = await request("PUT", `/accounts/${id}`, {
+      extraBuckets: ["hidden", "docs", "hidden"],
+    });
+    expect(saved.status).toBe(200);
+    const list = await request("GET", `/accounts/${id}/buckets`);
+    expect(list.body.buckets.map((b: { name: string }) => b.name)).toEqual([
+      "docs",
+      "hidden",
+    ]);
+    const accounts = await request("GET", "/accounts");
+    expect(accounts.body.accounts[0].extraBuckets).toEqual(["hidden", "docs"]);
+  });
+
+  it("refuses a bad name and clears the list", async () => {
+    const id = await addAccount();
+    const bad = await request("PUT", `/accounts/${id}`, {
+      extraBuckets: ["Bad Name"],
+    });
+    expect(bad.status).toBe(400);
+    await request("PUT", `/accounts/${id}`, { extraBuckets: ["hidden"] });
+    await request("PUT", `/accounts/${id}`, { extraBuckets: [] });
+    const list = await request("GET", `/accounts/${id}/buckets`);
+    expect(list.body.buckets).toEqual([]);
+  });
+});

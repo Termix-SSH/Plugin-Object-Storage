@@ -45,6 +45,9 @@
         "ca": {
           "type": "text"
         },
+        "extraBuckets": {
+          "type": "text"
+        },
         "status": {
           "type": "varchar",
           "length": 8,
